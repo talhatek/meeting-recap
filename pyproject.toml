@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meeting-recap"
+version = "0.1.0"
+description = "Transcribe and summarize audio recordings using Groq API (Whisper + LLM)"
+readme = "README.md"
+license = "MIT"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "groq>=1.0.0",
+    "pydub>=0.25.1",
+    "python-dotenv>=1.0.0",
+    "audioop-lts>=0.2.2; python_version>='3.13'",
+]
+
+[project.scripts]
+meeting-recap = "meeting_recap.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/talhatek/meeting-recap"
+Repository = "https://github.com/talhatek/meeting-recap"
+"Bug Tracker" = "https://github.com/talhatek/meeting-recap/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["meeting_recap*"]

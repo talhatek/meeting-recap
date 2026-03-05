@@ -1,6 +1,6 @@
 # Meeting Recap
 
-A CLI tool that transcribes audio recordings and generates structured meeting summaries using [Groq API](https://groq.com). Powered by Whisper for speech-to-text and Llama for summarization.
+A CLI tool **and Python library** that transcribes audio recordings and generates structured meeting summaries using [Groq API](https://groq.com). Powered by Whisper for speech-to-text and Llama for summarization.
 
 ## Features
 
@@ -9,6 +9,7 @@ A CLI tool that transcribes audio recordings and generates structured meeting su
 - **Automatic chunking** for large files (>25 MB free tier limit) with overlapping segments so no words are lost
 - **Multilingual support** -- works with any language Whisper supports (Russian, English, Spanish, French, German, and many more)
 - **Batch processing** -- drop multiple audio files into `input/` and process them all at once
+- **Importable library** -- use it in your own Python projects with a clean API
 
 ## Prerequisites
 
@@ -16,59 +17,51 @@ A CLI tool that transcribes audio recordings and generates structured meeting su
 - **ffmpeg** installed and available on your PATH ([download](https://ffmpeg.org/download.html))
 - A free **Groq API key** from [console.groq.com](https://console.groq.com)
 
-## Setup
+---
 
-1. **Clone the repository**
+## Install from PyPI
 
-   ```bash
-   git clone https://github.com/<your-username>/meeting-recap.git
-   cd meeting-recap
-   ```
+```bash
+pip install meeting-recap
+```
 
-2. **Create a virtual environment and install dependencies**
+> **Python 3.13+** also requires the `audioop-lts` shim (automatically installed as a dependency).
 
-   ```bash
-   python -m venv venv
+---
 
-   # Windows
-   venv\Scripts\activate
+## CLI Usage
 
-   # macOS / Linux
-   source venv/bin/activate
+### From a cloned repo
 
-   pip install groq pydub python-dotenv audioop-lts
-   ```
+```bash
+   git clone https://github.com/talhatek/meeting-recap.git
+cd meeting-recap
+python -m venv venv && venv\Scripts\activate  # Windows
+pip install -e .
+```
 
-3. **Configure your API key**
+Create a `.env` file with your API key:
 
-   Create a `.env` file in the project root:
-
-   ```
-   GROQ_API_KEY=your_api_key_here
-   ```
-
-4. **Create the input directory**
-
-   ```bash
-   mkdir input
-   ```
-
-## Usage
+```
+GROQ_API_KEY=your_api_key_here
+```
 
 Place one or more audio files into the `input/` folder, then run:
 
 ```bash
 # Transcribe & summarize (default: English)
+meeting-recap
+# or
 python main.py
 
 # Specify a different language (ISO-639-1 code)
-python main.py --language ru
+meeting-recap --language ru
 
 # Use a different Whisper model
-python main.py --model whisper-large-v3
+meeting-recap --model whisper-large-v3
 
 # Full example with all options
-python main.py \
+meeting-recap \
   --language en \
   --model whisper-large-v3-turbo \
   --summary-model llama-3.3-70b-versatile \
@@ -90,7 +83,7 @@ python main.py \
 
 `flac`, `mp3`, `mp4`, `mpeg`, `mpga`, `m4a`, `ogg`, `wav`, `webm`
 
-## Output
+### Output
 
 For each audio file, two files are generated in the `output/` directory:
 
@@ -100,12 +93,81 @@ output/
   meeting_summary.txt         # Structured summary with key points
 ```
 
-The summary includes:
-1. Brief overview of the meeting
-2. Key discussion points
-3. Decisions made
-4. Action items
-5. Important details and deadlines
+---
+
+## Library Usage
+
+Install and import in any Python project:
+
+```bash
+pip install meeting-recap
+```
+
+### Full pipeline (transcribe + summarize)
+
+```python
+from meeting_recap import process
+
+result = process("meeting.mp3", api_key="gsk_...")
+print(result.transcription)
+print(result.summary)
+```
+
+### Transcription only
+
+```python
+from meeting_recap import transcribe
+
+text = transcribe("meeting.mp3", api_key="gsk_...", language="ru")
+print(text)
+```
+
+### Summarization only
+
+```python
+from meeting_recap import summarize
+
+summary = summarize(text, api_key="gsk_...", language="ru")
+print(summary)
+```
+
+### Full API reference
+
+```python
+from meeting_recap import process, transcribe, summarize, RecapResult
+
+# process() -- full pipeline
+result: RecapResult = process(
+    audio_path="meeting.mp3",
+    api_key="gsk_...",
+    language="en",                        # ISO-639-1 language code
+    model="whisper-large-v3-turbo",       # Whisper model
+    summary_model="llama-3.3-70b-versatile",  # LLM model
+    verbose=True,                         # print progress
+)
+result.audio_path       # pathlib.Path to the source file
+result.transcription    # full transcription string
+result.summary          # structured summary string
+
+# transcribe() -- speech-to-text only
+text = transcribe(
+    audio_path="meeting.mp3",
+    api_key="gsk_...",
+    language="en",
+    model="whisper-large-v3-turbo",
+    verbose=True,
+)
+
+# summarize() -- summarize existing text
+summary = summarize(
+    text="...",
+    api_key="gsk_...",
+    language="en",
+    model="llama-3.3-70b-versatile",
+)
+```
+
+---
 
 ## How It Works
 
@@ -137,6 +199,8 @@ input/*.mp3
 - Chunks are exported as 64 kbps mono MP3 at 16 kHz (optimal for speech recognition)
 - Temporary chunk files are automatically cleaned up after processing
 
+---
+
 ## Supported Languages
 
 Any language supported by OpenAI Whisper. Common examples:
@@ -152,6 +216,8 @@ Any language supported by OpenAI Whisper. Common examples:
 | `ar` | Arabic | `pl` | Polish |
 
 Full list: [Whisper supported languages](https://github.com/openai/whisper#available-models-and-languages)
+
+---
 
 ## License
 

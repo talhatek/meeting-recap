@@ -9,3 +9,7 @@ __pycache__/
 session-*.md
 input/
 output/
+
+# Build / packaging artifacts
+dist/
+build/
