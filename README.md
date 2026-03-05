@@ -34,7 +34,7 @@ pip install meeting-recap
 ### From a cloned repo
 
 ```bash
-   git clone https://github.com/talhatek/meeting-recap.git
+git clone https://github.com/talhatek/meeting-recap.git
 cd meeting-recap
 python -m venv venv && venv\Scripts\activate  # Windows
 pip install -e .
